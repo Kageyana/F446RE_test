@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -31,7 +31,11 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#ifdef __GNUC__
+	#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#else
+	#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#endif /*__GNUC__*/
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -56,7 +60,10 @@ static void MX_USART2_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+PUTCHAR_PROTOTYPE {
+	HAL_UART_Transmit(&huart2, (uint8_t*)&ch, 1, 0xFFFF);
+	return ch;
+}
 /* USER CODE END 0 */
 
 /**
@@ -98,6 +105,7 @@ int main(void)
   {
     /* USER CODE END WHILE */
 	HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin, GPIO_PIN_SET);   //LEDを点灯
+	printf("cnt: %d\r\n", cnt++);
 	HAL_Delay(1500); //500ms待つ
 	HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin, GPIO_PIN_RESET); //LEDを消灯
 	HAL_Delay(1500); //500ms待つ
