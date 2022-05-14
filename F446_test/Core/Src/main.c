@@ -66,7 +66,7 @@ static void MX_USART2_UART_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+	int cnt = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -97,6 +97,10 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+	HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin, GPIO_PIN_SET);   //LEDを点灯
+	HAL_Delay(1500); //500ms待つ
+	HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin, GPIO_PIN_RESET); //LEDを消灯
+	HAL_Delay(1500); //500ms待つ
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
