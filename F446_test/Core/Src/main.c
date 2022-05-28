@@ -21,7 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <AQM0802.h>
+#include "AQM0802.h"
+#include "ILI9488.h"
 #include <stdio.h>
 #include <stdbool.h>
 /* USER CODE END Includes */
@@ -49,9 +50,13 @@
  ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
 
-I2C_HandleTypeDef hi2c3;
+I2C_HandleTypeDef hi2c1;
+
+SPI_HandleTypeDef hspi1;
+DMA_HandleTypeDef hdma_spi1_tx;
 
 TIM_HandleTypeDef htim1;
+TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim6;
 
 UART_HandleTypeDef huart2;
@@ -64,7 +69,8 @@ bool ledG = true;
 int v_led = 0;
 bool v_lim = true;
 
-bool btm_push = false;
+int btm_push = 0;
+int btm_cnt = 0;
 
 uint16_t analog[2];
 /* USER CODE END PV */
@@ -75,9 +81,11 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM6_Init(void);
 static void MX_DMA_Init(void);
-static void MX_I2C3_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_TIM1_Init(void);
+static void MX_I2C1_Init(void);
+static void MX_SPI1_Init(void);
+static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -88,31 +96,58 @@ PUTCHAR_PROTOTYPE {
 	HAL_UART_Transmit(&huart2, (uint8_t*)&ch, 1, 0xFFFF);
 	return ch;
 }
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* AdcHandle) {	 //ADC後にこ�?�関数が呼ばれる
-	//ADC後�?�処�?
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* AdcHandle) {	 //ADC後にこ�??????��?��??��?��???��?��??��?��????��?��??��?��???��?��??��?��関数が呼ばれる
+	//ADC後�??????��?��??��?��???��?��??��?��????��?��??��?��???��?��??��?��処?????��?��??��?��???��?��??��?��????��?��??��?��???��?��??��?��?
 
 }
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	lcdShowProcess();
 
-	if (v_led == 1000 ) {
-		v_lim = false;
-	} else if (v_led == 0) {
-		v_lim = true;
-	}
-
-	if (v_lim) v_led++;
-	else v_led--;
+//	if (v_led == 1000 ) {
+//		v_lim = false;
+//	} else if (v_led == 0) {
+//		v_lim = true;
+//	}
+//
+//	if (v_lim) v_led++;
+//	else v_led--;
 
 	// switch flag
-	if ( !HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_13) ) btm_push = true;
-	// switch push
-	if (btm_push) {
-		lcdRowPrintf(UPROW, "PWM %4d",(uint16_t)((double)analog[0]/4095*1000));
-		lcdRowPrintf(LOWROW, "A0 %5d",analog[0]);
-		__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, (uint16_t)((double)analog[0]/4095*1000));
+	if ( !HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_13) && btm_cnt > 500 ) {
+		btm_push++;
+		if (btm_push > 2) btm_push = 0;
+		btm_cnt = 0;
 	}
+	btm_cnt++;
+
+	// switch push
+	lcdRowPrintf(UPROW, "PWM %4d",(uint16_t)((double)analog[0]/4095*1000));
+	switch( btm_push ) {
+		case 0:
+			lcdRowPrintf(LOWROW, "    STOP");
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
+			__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, 0);
+			break;
+		case 1:
+			lcdRowPrintf(LOWROW, " FORWARD");
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, (uint16_t)((double)analog[0]/4095*1000));
+			__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, 0);
+			break;
+		case 2:
+			lcdRowPrintf(LOWROW, " REVERSE");
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
+			__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, (uint16_t)((double)analog[0]/4095*1000));
+			break;
+	}
+//	if (btm_push) {
+////		lcdRowPrintf(UPROW, "PWM %4d",(uint16_t)((double)analog[0]/4095*1000));
+////		lcdRowPrintf(LOWROW, "A0 %5d",analog[0]);
+//		lcdRowPrintf(LOWROW, "positive");
+//		__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, (uint16_t)((double)analog[0]/4095*1000));
+//	} else if (btm_push == false){
+//		lcdRowPrintf(LOWROW, "negative");
+//	}
 
 	timer500++;
 	switch ( timer500 ) {
@@ -121,7 +156,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			else HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin, GPIO_PIN_RESET); //LED OFF
 			ledG = !ledG;
 
-			printf("cnt: %d\r\n", cnt++);
+//			printf("cnt: %d\r\n", cnt++);
 			timer500 = 0;
 			break;
 		default:
@@ -159,9 +194,11 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM6_Init();
   MX_DMA_Init();
-  MX_I2C3_Init();
   MX_ADC1_Init();
   MX_TIM1_Init();
+  MX_I2C1_Init();
+  MX_SPI1_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   intiLcd();						// LCD initialize
   HAL_TIM_Base_Start_IT(&htim6);	// ticker start
@@ -169,11 +206,16 @@ int main(void)
   HAL_Delay(500);
   // PWM start
   if (HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3) != HAL_OK)	Error_Handler();
+  if (HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2) != HAL_OK)	Error_Handler();
   // LCD ON
   lcdRowPrintf(UPROW, "Hello  ");
   lcdRowPrintf(LOWROW, "Cube IDE");
   // ADC start
   if (HAL_ADC_Start_DMA(&hadc1, (uint32_t *) analog, 1) != HAL_OK) Error_Handler();
+
+  // Graphic display
+  LCD_setup();
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -181,6 +223,7 @@ int main(void)
   while (1)
   {
 //	lcdRowPrintf(UPROW, "Cube IDE");
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -288,36 +331,74 @@ static void MX_ADC1_Init(void)
 }
 
 /**
-  * @brief I2C3 Initialization Function
+  * @brief I2C1 Initialization Function
   * @param None
   * @retval None
   */
-static void MX_I2C3_Init(void)
+static void MX_I2C1_Init(void)
 {
 
-  /* USER CODE BEGIN I2C3_Init 0 */
+  /* USER CODE BEGIN I2C1_Init 0 */
 
-  /* USER CODE END I2C3_Init 0 */
+  /* USER CODE END I2C1_Init 0 */
 
-  /* USER CODE BEGIN I2C3_Init 1 */
+  /* USER CODE BEGIN I2C1_Init 1 */
 
-  /* USER CODE END I2C3_Init 1 */
-  hi2c3.Instance = I2C3;
-  hi2c3.Init.ClockSpeed = 400000;
-  hi2c3.Init.DutyCycle = I2C_DUTYCYCLE_2;
-  hi2c3.Init.OwnAddress1 = 0;
-  hi2c3.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-  hi2c3.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-  hi2c3.Init.OwnAddress2 = 0;
-  hi2c3.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-  hi2c3.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-  if (HAL_I2C_Init(&hi2c3) != HAL_OK)
+  /* USER CODE END I2C1_Init 1 */
+  hi2c1.Instance = I2C1;
+  hi2c1.Init.ClockSpeed = 400000;
+  hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
+  hi2c1.Init.OwnAddress1 = 0;
+  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c1.Init.OwnAddress2 = 0;
+  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN I2C3_Init 2 */
+  /* USER CODE BEGIN I2C1_Init 2 */
 
-  /* USER CODE END I2C3_Init 2 */
+  /* USER CODE END I2C1_Init 2 */
+
+}
+
+/**
+  * @brief SPI1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_SPI1_Init(void)
+{
+
+  /* USER CODE BEGIN SPI1_Init 0 */
+
+  /* USER CODE END SPI1_Init 0 */
+
+  /* USER CODE BEGIN SPI1_Init 1 */
+
+  /* USER CODE END SPI1_Init 1 */
+  /* SPI1 parameter configuration*/
+  hspi1.Instance = SPI1;
+  hspi1.Init.Mode = SPI_MODE_MASTER;
+  hspi1.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi1.Init.NSS = SPI_NSS_SOFT;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
+  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi1.Init.CRCPolynomial = 10;
+  if (HAL_SPI_Init(&hspi1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN SPI1_Init 2 */
+
+  /* USER CODE END SPI1_Init 2 */
 
 }
 
@@ -383,6 +464,55 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 2 */
   HAL_TIM_MspPostInit(&htim1);
+
+}
+
+/**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 100;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 830;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
+  HAL_TIM_MspPostInit(&htim2);
 
 }
 
@@ -470,6 +600,9 @@ static void MX_DMA_Init(void)
   /* DMA2_Stream0_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
+  /* DMA2_Stream3_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream3_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream3_IRQn);
 
 }
 
@@ -489,7 +622,13 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(SPI_LCD_DTREG_GPIO_Port, SPI_LCD_DTREG_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(SPI_LCD_RESET_GPIO_Port, SPI_LCD_RESET_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : BTM_Blue_Pin */
   GPIO_InitStruct.Pin = BTM_Blue_Pin;
@@ -497,12 +636,26 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(BTM_Blue_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : SPI_LCD_DTREG_Pin */
+  GPIO_InitStruct.Pin = SPI_LCD_DTREG_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(SPI_LCD_DTREG_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pin : LED_G_Pin */
   GPIO_InitStruct.Pin = LED_G_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED_G_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : SPI_LCD_RESET_Pin */
+  GPIO_InitStruct.Pin = SPI_LCD_RESET_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(SPI_LCD_RESET_GPIO_Port, &GPIO_InitStruct);
 
 }
 

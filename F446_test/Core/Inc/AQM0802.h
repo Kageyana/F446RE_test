@@ -1,8 +1,5 @@
 #ifndef I2C_LCD_H_
 #define I2C_LCD_H_
-#ifdef __cplusplus
-extern "C" {
-#endif
 //====================================//
 // インクルード
 //====================================//
@@ -25,13 +22,13 @@ extern "C" {
 #define CLOCK		84		// 動作周波数[MHz]
 
 /******************************** 自動生成関数 *********************************/
-#define 	I2C_LCD_DATA_SEND	HAL_I2C_Master_Transmit(&hi2c3,LCD_SLAVEADDRESS,word,2,100);
-#define	    I2C_LCD_CMD_SEND	HAL_I2C_Master_Transmit(&hi2c3,LCD_SLAVEADDRESS,Command,2,100);
+#define 	I2C_LCD_DATA_SEND	HAL_I2C_Master_Transmit(&hi2c1,LCD_SLAVEADDRESS,word,2,100);
+#define	    I2C_LCD_CMD_SEND	HAL_I2C_Master_Transmit(&hi2c1,LCD_SLAVEADDRESS,Command,2,100);
 /***************************************************************************/
 //====================================//
 // グローバル変数の宣言
 //====================================//
-extern I2C_HandleTypeDef hi2c3;
+extern I2C_HandleTypeDef hi2c1;
 //====================================//
 // プロトタイプ宣言
 //====================================//
