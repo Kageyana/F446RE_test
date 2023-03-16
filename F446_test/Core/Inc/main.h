@@ -31,6 +31,12 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdio.h>
+#include <stdbool.h>
+
+#include "timer.h"
+#include "AQM0802.h"
+#include "control.h"
 
 /* USER CODE END Includes */
 
@@ -61,22 +67,32 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define BTM_Blue_Pin GPIO_PIN_13
 #define BTM_Blue_GPIO_Port GPIOC
-#define SPI_LCD_DTREG_Pin GPIO_PIN_0
-#define SPI_LCD_DTREG_GPIO_Port GPIOC
 #define USART_TX_Pin GPIO_PIN_2
 #define USART_TX_GPIO_Port GPIOA
 #define USART_RX_Pin GPIO_PIN_3
 #define USART_RX_GPIO_Port GPIOA
 #define LED_G_Pin GPIO_PIN_5
 #define LED_G_GPIO_Port GPIOA
-#define SPI_LCD_RESET_Pin GPIO_PIN_0
-#define SPI_LCD_RESET_GPIO_Port GPIOB
 #define TMS_Pin GPIO_PIN_13
 #define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14
 #define TCK_GPIO_Port GPIOA
-/* USER CODE BEGIN Private defines */
+#define motorDIR_Pin GPIO_PIN_5
+#define motorDIR_GPIO_Port GPIOB
 
+/* USER CODE BEGIN Private defines */
+extern ADC_HandleTypeDef hadc1;
+extern DMA_HandleTypeDef hdma_adc1;
+
+extern I2C_HandleTypeDef hi2c1;
+
+extern DMA_HandleTypeDef hdma_spi1_tx;
+
+extern TIM_HandleTypeDef htim1;
+extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim6;
+
+extern UART_HandleTypeDef huart2;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
