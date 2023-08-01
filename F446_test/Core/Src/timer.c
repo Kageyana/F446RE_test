@@ -41,10 +41,14 @@ void inturrpt1ms(void) {
 
 	// switch push
 	// lcdRowPrintf(UPROW, "PWM %4d",(uint16_t)((double)analog[0]/4095*1000));
+
+	// MP6551
+	/*
 	switch( btm_push ) {
 		case 0:
 			// lcdRowPrintf(LOWROW, "    STOP");
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
+			__HAL_TIM_SET_COMPARE(&htim13, TIM_CHANNEL_1, 0);
             
 			// __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, 0);
 			break;
@@ -52,15 +56,18 @@ void inturrpt1ms(void) {
 			// lcdRowPrintf(LOWROW, " FORWARD");
             HAL_GPIO_WritePin(motorDIR_GPIO_Port, motorDIR_Pin, GPIO_PIN_SET);
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, (uint16_t)((double)analog[0]/4095*223));
+			__HAL_TIM_SET_COMPARE(&htim13, TIM_CHANNEL_1, (uint16_t)((double)analog[0]/4095*223));
 			// __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, 0);
 			break;
 		case 2:
 			// lcdRowPrintf(LOWROW, " REVERSE");
             HAL_GPIO_WritePin(motorDIR_GPIO_Port, motorDIR_Pin, GPIO_PIN_RESET);
             __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, (uint16_t)((double)analog[0]/4095*223));
+            __HAL_TIM_SET_COMPARE(&htim13, TIM_CHANNEL_1, (uint16_t)((double)analog[0]/4095*223));
             // __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, 0);
 			break;
 	}
+	*/ 
 
 //	if (btm_push) {
 ////		lcdRowPrintf(UPROW, "PWM %4d",(uint16_t)((double)analog[0]/4095*1000));

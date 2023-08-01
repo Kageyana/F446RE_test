@@ -37,7 +37,8 @@ extern "C" {
 #include "timer.h"
 #include "AQM0802.h"
 #include "control.h"
-
+#include "ssd1306.h"
+#include "ssd1306_fonts.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -91,6 +92,7 @@ extern DMA_HandleTypeDef hdma_spi1_tx;
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim6;
+extern TIM_HandleTypeDef htim13;
 
 extern UART_HandleTypeDef huart2;
 /* USER CODE END Private defines */

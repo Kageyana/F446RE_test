@@ -15,9 +15,10 @@ uint16_t analog[2];
 void initSys(void) {
     // intiLcd();						// LCD initialize
     // lcdClear();						// LCD clear
-    HAL_TIM_Base_Start_IT(&htim6);	// ticker start
+    HAL_TIM_Base_Start_IT(&htim6);	// タイマ割り込み(1ms)
     // PWM start
     if (HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3) != HAL_OK)	Error_Handler();
+    if (HAL_TIM_PWM_Start(&htim13, TIM_CHANNEL_1) != HAL_OK)	Error_Handler();
     if (HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2) != HAL_OK)	Error_Handler();
     // LCD ON
     // lcdRowPrintf(UPROW, "Hello  ");
