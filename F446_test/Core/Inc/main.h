@@ -33,9 +33,8 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <stdbool.h>
-
+#include "WS2812C.h"
 #include "timer.h"
-#include "AQM0802.h"
 #include "control.h"
 #include "ssd1306.h"
 #include "ssd1306_fonts.h"
@@ -78,21 +77,18 @@ void Error_Handler(void);
 #define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14
 #define TCK_GPIO_Port GPIOA
-#define motorDIR_Pin GPIO_PIN_5
-#define motorDIR_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 extern ADC_HandleTypeDef hadc1;
 extern DMA_HandleTypeDef hdma_adc1;
-
-extern I2C_HandleTypeDef hi2c1;
-
 extern DMA_HandleTypeDef hdma_spi1_tx;
-
 extern TIM_HandleTypeDef htim1;
+extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim13;
+
+extern I2C_HandleTypeDef hi2c1;
 
 extern UART_HandleTypeDef huart2;
 /* USER CODE END Private defines */
