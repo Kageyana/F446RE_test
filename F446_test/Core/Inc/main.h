@@ -33,11 +33,14 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
+#include <stdarg.h>
 #include "WS2812C.h"
 #include "timer.h"
 #include "control.h"
-#include "ssd1306.h"
-#include "ssd1306_fonts.h"
+#include "ssd1351.h"
+#include "fonts.h"
+#include "testimg.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -71,12 +74,12 @@ void Error_Handler(void);
 #define USART_TX_GPIO_Port GPIOA
 #define USART_RX_Pin GPIO_PIN_3
 #define USART_RX_GPIO_Port GPIOA
-#define LED_G_Pin GPIO_PIN_5
-#define LED_G_GPIO_Port GPIOA
 #define TMS_Pin GPIO_PIN_13
 #define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14
 #define TCK_GPIO_Port GPIOA
+#define SSD1351_CS_Pin GPIO_PIN_6
+#define SSD1351_CS_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 extern ADC_HandleTypeDef hadc1;
@@ -88,8 +91,8 @@ extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim13;
 
-extern I2C_HandleTypeDef hi2c1;
-
+// extern I2C_HandleTypeDef hi2c1;
+extern SPI_HandleTypeDef hspi1;
 extern UART_HandleTypeDef huart2;
 /* USER CODE END Private defines */
 

@@ -29,19 +29,15 @@ void initSys(void) {
     // Graphic display
     // LCD_setup();
 
-	ssd1306_Init();
-	ssd1306_Fill(Black);
-	ssd1306_SetCursor(0,0);
-	ssd1306_WriteString("ssd1306",Font_7x10,White);
+	// ssd1306_Init();
+	// ssd1306_Fill(Black);
+	// ssd1306_SetCursor(0,0);
+	// ssd1306_WriteString("ssd1306",Font_7x10,White);
+	// ssd1306_Line(60,60,120,0,White);
+	// ssd1306_DrawArcWithRadiusLine(0,20,30,0,70,White);
+	// ssd1306_FillCircle(90,30,20,White);
+	// ssd1306_DrawRectangle(60,0,120,60,White);
+	// ssd1306_UpdateScreen();
 
-	ssd1306_Line(60,60,120,0,White);
-
-	ssd1306_DrawArcWithRadiusLine(0,20,30,0,70,White);
-
-	ssd1306_FillCircle(90,30,20,White);
-
-	ssd1306_DrawRectangle(60,0,120,60,White);
-
-	ssd1306_UpdateScreen();
 	
 }

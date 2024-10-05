@@ -78,17 +78,18 @@ void inturrpt1ms(void) {
 //		lcdRowPrintf(LOWROW, "negative");
 //	}
 
-	timer500++;
-	switch ( timer500 ) {
-		case 500:
-			if (ledG) HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin, GPIO_PIN_SET);   //LED ON
-			else HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin, GPIO_PIN_RESET); //LED OFF
-			ledG = !ledG;
+	// LEDの点灯 PA5
+	// timer500++;
+	// switch ( timer500 ) {
+	// 	case 500:
+	// 		if (ledG) HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin, GPIO_PIN_SET);   //LED ON
+	// 		else HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin, GPIO_PIN_RESET); //LED OFF
+	// 		ledG = !ledG;
 
-			// printf("cnt: %d\r\n", cnt++);
-			timer500 = 0;
-			break;
-		default:
-			break;
-	}
+	// 		// printf("cnt: %d\r\n", cnt++);
+	// 		timer500 = 0;
+	// 		break;
+	// 	default:
+	// 		break;
+	// }
 }
